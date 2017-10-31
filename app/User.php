@@ -3,7 +3,9 @@
 namespace App;
 
 use Laravel\Passport\HasApiTokens;
+use Psr\Log\InvalidArgumentException;
 use Illuminate\Notifications\Notifiable;
+use Propaganistas\LaravelPhone\PhoneNumber;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable
@@ -38,5 +40,24 @@ class User extends Authenticatable
     public function findForPassport($identifier) {
         $field = filter_var($identifier, FILTER_VALIDATE_EMAIL) ? 'email' : 'cell';
         return User::where($field, $identifier)->first();
+    }
+
+    /**
+     * Normalize the phone number to always be international
+     * @param [type] $value [description]
+     */
+    public function setCellAttribute($value)
+    {
+        //set the number to be south african
+        $number = PhoneNumber::make($value, 'ZA');
+        //throws exception if number is invalid
+        try{
+            $number = preg_replace('/\s+/', '', $number->formatInternational());
+        } catch(\Exception $e) {
+            //the number is not valid
+            $number = null;
+        }
+
+        $this->attributes['cell'] = $number;
     }
 }

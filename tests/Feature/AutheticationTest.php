@@ -18,15 +18,12 @@ class AutheticationTest extends TestCase
     {
         parent::setUp();
         //install passport
+        //test assumes password auth
         Artisan::call('passport:install');
     }
 
-    /**
-     * A basic test example.
-     *
-     * @return void
-     */
-    public function test_can_login_with_email()
+    /** @test */
+    public function can_login_with_email()
     {
         //arrange
         $user = factory(\App\User::class)->create();
@@ -36,11 +33,43 @@ class AutheticationTest extends TestCase
 		// );
 
         //act
-        $response = $this->post('/api/login', [
+        $response = $this->json('POST', '/api/login', [
         	'username' => $user->email,
         	'password' => 'secret'
         ]);
+
         //assert
-        dd($response->decodeResponseJson());
+        $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'token_type',
+            'expires_in',
+            'access_token',
+            'refresh_token'
+        ]);
+    }
+
+    /** @test */
+    public function can_login_with_sa_phone_number()
+    {
+        // $this->withoutExceptionHandling();
+        //arrange
+        $user = factory(\App\User::class)->create([
+            'cell' => '0027740123456'
+        ]);
+
+        //act
+        $response = $this->json('POST', '/api/login', [
+            'username' => $user->cell,
+            'password' => 'secret'
+        ]);
+
+        //assert
+        $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'token_type',
+            'expires_in',
+            'access_token',
+            'refresh_token'
+        ]);
     }
 }
