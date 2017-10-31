@@ -2,7 +2,11 @@
 
 namespace App\Http\Controllers\Auth;
 
+use DB;
+use Illuminate\Http\Request;
+use App\Rules\EmailOrZAPhone;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 
 class LoginController extends Controller
@@ -28,12 +32,6 @@ class LoginController extends Controller
     protected $redirectTo = '/home';
 
     /**
-     * Passport client
-     * @var obj
-     */
-    protected $client;
-
-    /**
      * Create a new controller instance.
      *
      * @return void
@@ -41,55 +39,5 @@ class LoginController extends Controller
     public function __construct()
     {
         $this->middleware('guest')->except('logout');
-        $this->client = DB::table('oauth_clients')->where('id', 2)->first();
-    }
-
-    /**
-     * @param Request $request
-     * @return mixed
-     */
-    protected function apiLogin(Request $request)
-    {
-        $validatedData = request()->validate([
-            'username' => 'required',
-            'password' => 'required'
-        ]);
-        
-        $request->merge([
-            'username' => $request->username,
-            'password' => $request->password,
-            'grant_type' => 'password',
-            'client_id' => $this->client->id,
-            'client_secret' => $this->client->secret,
-            'scope' => '*'
-        ]);
-
-        $proxy = Request::create(
-            'oauth/token',
-            'POST'
-        );
-
-        return Route::dispatch($proxy);
-    }
-
-    /**
-     * @param Request $request
-     * @return mixed
-     */
-    protected function refreshToken(Request $request)
-    {
-        $request->merge([
-            'grant_type' => 'refresh_token',
-            'refresh_token' => $request->refresh_token,
-            'client_id' => $this->client->id,
-            'client_secret' => $this->client->secret,
-        ]);
-
-        $proxy = Request::create(
-            '/oauth/token',
-            'POST'
-        );
-
-        return Route::dispatch($proxy);
     }
 }
