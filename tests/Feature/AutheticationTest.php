@@ -33,7 +33,7 @@ class AutheticationTest extends TestCase
 		// );
 
         //act
-        $response = $this->json('POST', '/api/login', [
+        $response = $this->json('POST', '/api/auth/login', [
         	'username' => $user->email,
         	'password' => 'secret'
         ]);
@@ -58,7 +58,7 @@ class AutheticationTest extends TestCase
         ]);
 
         //act
-        $response = $this->json('POST', '/api/login', [
+        $response = $this->json('POST', '/api/auth/login', [
             'username' => $user->cell,
             'password' => 'secret'
         ]);

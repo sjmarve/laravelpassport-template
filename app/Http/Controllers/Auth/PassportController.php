@@ -109,6 +109,10 @@ class PassportController extends Controller
         ]);
     }
 
+    public function refresh(Request $request)
+    {
+        return ':)';
+    }
     /**
      * Password Grant client object
      * 
